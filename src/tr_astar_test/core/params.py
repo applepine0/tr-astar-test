@@ -11,11 +11,21 @@ class RobotParams:
     Parameters for the robot.
     """
 
-    max_steer_rate_rps: float = 200
-    length_mm: int = 700
-    width_mm: int = 700
+    # 车体度量参数 占位待实测
+    wheel_radius_m: float = 0.1
+    length_m: float = 0.7
+    width_m: float = 0.7
+    wheel_count: int = 4
 
+    # 舵轮限幅参数
+
+    max_steer_rate_rps: float = 200
     max_drive_rate_mps: int = 3
+
+    @property
+    def circumradius_m(self) -> float:
+        """车体外接圆半径，供外扩用的保守值"""
+        return 0.5 * (self.length_m**2 + self.width_m**2) ** 0.5
 
 
 @dataclass(frozen=True)
@@ -25,13 +35,13 @@ class UnmoveableZone:
     默认为矩形，以起点为矩形靠近原点的对角点，终点为矩形远离原点的对角点
     """
 
-    start_point: tuple[int, int]
-    end_point: tuple[int, int]
+    start_point: tuple[float, float]
+    end_point: tuple[float, float]
 
 
 UNMOVEABLE_ZONE: tuple[UnmoveableZone, ...] = (
-    UnmoveableZone((2500, 2500), (8500, 5500)),  # L1
-    UnmoveableZone((2800, 1500), (7200, 2500)),  # 阶梯，台阶，交接区
+    UnmoveableZone((2.5, 2.5), (8.5, 5.5)),  # L1
+    UnmoveableZone((2.8, 1.5), (7.2, 2.5)),  # 阶梯，台阶，交接区
 )
 
 
@@ -41,6 +51,6 @@ class FieldParams:
     Parameters for the field.
     """
 
-    field_width_mm: int = 5500
-    field_length_mm: int = 11000
+    start_point: tuple[float, float] = (0, 0)
+    end_point: tuple[float, float] = (11.0, 5.5)
     unmoveable_zones = UNMOVEABLE_ZONE
