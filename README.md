@@ -27,3 +27,70 @@ tr-planning/
 └── tests/
     ├── test_cost_admissible.py
     └── test_astar_basic.py
+
+# 命名规范推荐
+1. 基础格式规范（PEP 8 标准）
+变量、函数、方法：全小写，单词间用下划线分隔。snake_case
+
+✅ vertices, expand, is_near_zero, calculate_distance
+
+类名、异常：首字母大写（大驼峰）。PascalCase
+
+✅ Polygon, Pose2D, CollisionError
+
+全局常量：全大写，下划线分隔。UPPER_SNAKE_CASE
+
+✅ MAX_SPEED, GEOMETRY_EPSILON, PI
+
+模块（文件）名：全小写，尽量简短。
+
+✅ geometry.py, pose_utils.py
+
+2. ⭐ 结合你场景的高级命名法则（极度推荐）
+在几何、机器人和物理引擎中，仅有基础格式是不够的，极易造成单位混淆或坐标系混乱。
+
+① 单位后缀法（避免火星探测器坠毁惨案）
+永远在变量名中带上单位。这能防止你把“角度”和“弧度”相加，或者把“米”当成“毫米”。
+
+✅ x_m （x坐标，单位米）
+
+✅ theta_rad （角度，弧度制） / theta_deg （角度制）
+
+✅ timeout_ms （超时时间，毫秒）
+
+✅ length_px （像素长度）
+
+反例：x, angle, timeout （极其容易产生歧义）。
+
+② 坐标系来源-目标后缀法（Frame Suffix）
+在机器人和 SLAM 中，必须标明这个位姿/向量是在哪个坐标系下。
+
+✅ pose_world （世界坐标系下的位姿）
+
+✅ pose_base （机器人基座坐标系下的位姿）
+
+✅ T_world_base （从基座坐标系到世界坐标系的变换矩阵）
+
+反例：current_pose, target_pose （不知道是相对于谁的）。
+
+③ 布尔值前缀法
+必须让人一眼看出这是 True/False，通常用 is_, has_, can_, should_ 开头。
+
+✅ is_closed （多边形是否闭合）
+
+✅ is_convex （是否为凸多边形）
+
+✅ has_collision （是否发生碰撞）
+
+✅ can_expand （是否可以膨胀）
+
+反例：status, flag, check （这种词你无法判断真假值的语义）。
+
+④ 差值/增量前缀法
+在计算位移、旋转时，dx, dy, d_theta 是数学惯例。但在代码中，推荐写全 delta 或使用明确的前缀。
+
+✅ delta_x, delta_y 或 dx, dy（限于局部极短的数学循环）
+
+✅ prev_vertex / curr_vertex （上一个/当前顶点）
+
+✅ min_x / max_x
