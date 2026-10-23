@@ -54,3 +54,6 @@ class FieldParams:
     start_point: tuple[float, float] = (0, 0)
     end_point: tuple[float, float] = (11.0, 5.5)
     unmoveable_zones = UNMOVEABLE_ZONE
+    fence_halfthickness_m: float = (
+        0.01  # 场地边界栅格化时的外扩量，防止机器人碰撞到边界
+    )
