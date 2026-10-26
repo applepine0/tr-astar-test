@@ -57,7 +57,9 @@ class Polygon:
     def from_rect(d0: tuple[float, float], d1: tuple[float, float]):
         """从矩形的左上角和右下角坐标构造逆时针多边形。"""
         # todo:防范传反坐标与退化图形
-        return Polygon(((d0[0], d0[1]), (d1[0], d0[1]), (d0[0], d1[1]), (d1[0], d1[1])))
+        return Polygon(
+            ((d0[0], d0[1]), (d1[0], d0[1]), (d1[0], d1[1]), (d0[0], d1[1]))
+        )  # 此处应按照时针顺序传入以防止建图时产生交叉多边形
 
 
 @dataclass(frozen=True)
