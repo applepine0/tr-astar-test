@@ -1,6 +1,8 @@
 import math
 from dataclasses import dataclass
 
+from shapely.geometry import Polygon as sgPolygon
+
 
 def wrap2pi(angle: float) -> float:
     return (angle + math.pi) % (2.0 * math.pi) - math.pi
@@ -32,6 +34,19 @@ class Polygon:
             raise ValueError("Polygon must have at least 3 vertices")
 
     def expand(self, r: float):
+        """依赖shapely的严格minkowski扩展，适用于任意多边形。"""
+        shapely_geom = sgPolygon(self.vertices)
+        buffered_geom = shapely_geom.buffer(r, quad_segs=8)  # 八段圆弧精度外扩
+
+        if buffered_geom.geom_type == "Polygon":
+            new_vertices = tuple(buffered_geom.exterior.coords)
+
+        else:
+            # todo: 处理缓冲区结果为 MultiPolygon 的情况，暂时抛出异常
+            raise ValueError("Expanded geometry is not a polygon")
+        return Polygon(new_vertices[:-1], self.shape)  # type: ignore # todo:对数据进行清洗保证符合格式
+
+    def original_expand(self, r: float):
         """沿各顶点法线向外偏移 r 的粗略版本（非严格 Minkowski）。
 
         仅适用于凸多边形；对矩形等规则形状够用。
