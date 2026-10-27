@@ -41,7 +41,7 @@ class UnmoveableZone:
 
 UNMOVEABLE_ZONE: tuple[UnmoveableZone, ...] = (
     UnmoveableZone((2.5, 2.5), (8.5, 5.5)),  # L1
-    UnmoveableZone((2.8, 1.5), (7.2, 2.5)),  # 阶梯，台阶，交接区
+    UnmoveableZone((2.8, 1.5), (7.2, 2.5)),  # 阶梯，台阶，交接区，以下称L0_5
 )
 
 

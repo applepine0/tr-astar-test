@@ -32,12 +32,16 @@ class Field:
             UNMOVEABLE_ZONE[0].start_point,
             UNMOVEABLE_ZONE[0].end_point,
         )
+        layer0_5 = Polygon.from_rect(
+            UNMOVEABLE_ZONE[1].start_point,
+            UNMOVEABLE_ZONE[1].end_point,
+        )
         box = None  # 动态静态障碍：单次场地仿真中不变
         keepout = []
         if box is not None:
             keepout.append(box)
         return Field(
             params=p,
-            obstacles=(layer1,),
+            obstacles=(layer1, layer0_5),
             keepout=tuple(keepout),
         )
