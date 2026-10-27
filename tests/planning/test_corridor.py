@@ -6,9 +6,9 @@
     3. 几何语义（哪边是里）  —— 受已知缺陷影响，整类标记 xfail
     4. 区域一致性          —— 受已知缺陷影响，整类标记 xfail
     5. 形心与中心线        —— 不依赖半空间，应通过
-    6. 已知缺陷            —— 单独列出，写明实测值与修法
+    6. 错误报告与边界行为
 
-修好 `_compile` 的法向后，被 xfail 的测试会变成 XPASS。
+法向符号、bool 返回、校验顺序三处缺陷已修复，原 xfail 已全部转成硬断言。
 """
 
 from __future__ import annotations
@@ -21,14 +21,6 @@ from shapely.geometry import Polygon as SgPolygon
 from tr_astar_test.planning.corridor import Corridor, Halfspaces, centerline
 
 RECT = (0.0, 0.0, 1.0, 1.0)
-
-# 法向符号 bug 的统一说明，避免每处重复
-NORMAL_BUG = (
-    "已知缺陷：_compile 里外法向的 y 分量符号写反。"
-    "实测 from_rect(0,0,1,1) 得到 A=[[0,1],[1,0],[0,-1],[-1,0]]、b=[0,1,-1,0]，"
-    "中心点 margin=-0.5、contains=False。正确外法向应为 (dy/L, -dx/L)，"
-    "现为 (dy/L, +dx/L)，使半空间区域关于 x 轴镜像（竖直边正确，水平边朝外）。"
-)
 
 
 def rect() -> Corridor:
@@ -48,12 +40,14 @@ def region_matches_polygon(corridor: Corridor, samples_per_axis: int = 40) -> fl
     total = 0
     for x in xs:
         for y in ys:
-            if corridor.contains(float(x), float(y)) != poly.covers(
-                Point(float(x), float(y))
-            ):
+            px, py = float(x), float(y)
+            # 压线的点跳过：contains 有 1e-6 容差，而 shapely 是精确判定
+            if abs(corridor.halfspaces.margin(px, py)) < 1e-6:
+                continue
+            if corridor.contains(px, py) != poly.covers(Point(px, py)):
                 mismatch += 1
             total += 1
-    return mismatch / total
+    return mismatch / total if total else 0.0
 
 
 # ---------------------------------------------------------------- 1. 构造与校验
@@ -141,7 +135,6 @@ class TestHalfspaceObject:
 # ---------------------------------------------------------------- 3. 几何语义
 
 
-@pytest.mark.xfail(reason=NORMAL_BUG, strict=False)
 class TestHalfspaceSemantics:
     """内部点 margin > 0、外部点 margin < 0。"""
 
@@ -171,7 +164,6 @@ class TestHalfspaceSemantics:
 # ---------------------------------------------------------------- 4. 区域一致性
 
 
-@pytest.mark.xfail(reason=NORMAL_BUG, strict=False)
 class TestRegionConsistency:
     def test_region_matches_polygon(self):
         frac = region_matches_polygon(rect())
@@ -222,40 +214,36 @@ class TestCenterline:
         c = Corridor.from_rect(1.0, 0.6, 2.0, 0.9)
         assert isinstance(centerline((c,), (0.5, 0.75), (2.5, 0.75)), tuple)
 
-    @pytest.mark.xfail(reason=NORMAL_BUG, strict=False)
     def test_all_points_inside_corridor(self):
         c = Corridor.from_rect(1.0, 0.6, 3.0, 0.9)
         for x, y in centerline((c,), (1.2, 0.75), (2.8, 0.75)):
             assert c.contains(x, y) is True
 
 
-# ---------------------------------------------------------------- 6. 已知缺陷
+# ---------------------------------------------------------------- 6. 错误报告与边界行为
 
 
-class TestKnownDefects:
-    @pytest.mark.xfail(
-        reason=(
-            "已知缺陷：contains() 返回 np.bool_ 而不是 Python bool。"
-            "`distance >= 0` 得到 np.bool_，`or` 会原样返回它，"
-            "导致 `x is True` 失败、json.dumps 也会失败（if 判断不受影响）。"
-            "修法：return bool(distance >= 0 or is_near_zero(distance))。"
-        ),
-        strict=False,
-    )
+class TestErrorReporting:
     def test_contains_returns_python_bool(self):
-        hs = Halfspaces(np.array([[1.0, 0.0]]), np.array([0.0]))
-        assert hs.contains(0.5, 0.0) is True
-        assert isinstance(hs.contains(0.5, 0.0), bool)
+        """返回 bool 而不是 np.bool_，否则 `is True` 失效、json 序列化会炸。"""
+        hs = Halfspaces(np.array([[-1.0, 0.0]]), np.array([0.0]))  # 区域 x >= 0
+        result = hs.contains(0.5, 0.0)
+        assert result is True
+        assert isinstance(result, bool)
 
-    @pytest.mark.xfail(
-        reason=(
-            "已知缺陷：顺时针输入时错误信息来自 geometry.is_convex_ccw"
-            "（'请传入按逆时针顺序排列的顶点'），而不是 corridor 自己的"
-            "'走廊顶点必须按逆时针顺序排列'。根因：is_convex_ccw 在顺序错误时"
-            "直接 raise，导致 __post_init__ 里那句 `if not is_convex_ccw(...)` 永不执行。"
-        ),
-        strict=False,
-    )
+    def test_contains_rejects_clear_violation(self):
+        hs = Halfspaces(np.array([[-1.0, 0.0]]), np.array([0.0]))
+        assert hs.contains(-1e-3, 0.0) is False
+
+    def test_contains_accepts_tiny_violation(self):
+        """is_near_zero 的 1e-6 容差：刚好压线算在里面。"""
+        hs = Halfspaces(np.array([[-1.0, 0.0]]), np.array([0.0]))
+        assert hs.contains(-5e-7, 0.0) is True
+
     def test_clockwise_error_message_comes_from_corridor(self):
         with pytest.raises(ValueError, match="走廊顶点"):
             Corridor(((0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)))
+
+    def test_concave_error_message_mentions_convex(self):
+        with pytest.raises(ValueError, match="凸"):
+            Corridor(((0.0, 0.0), (2.0, 0.0), (1.0, 0.5), (2.0, 2.0), (0.0, 2.0)))

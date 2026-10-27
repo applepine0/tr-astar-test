@@ -40,10 +40,11 @@ class Corridor:
         v = tuple((float(x), float(y)) for x, y in self.vertices)
         if len(v) < 3:
             raise ValueError(f"走廊数量至少为3个，实际为{len(v)}")
-        if not is_convex_ccw(v):
-            raise ValueError("走廊顶点必须为凸多边形")
+        # 顺序必须先判：is_convex_ccw 在非逆时针时会直接抛异常
         if not signed_area(v) > 0:
             raise ValueError("走廊顶点必须按逆时针顺序排列")
+        if not is_convex_ccw(v):
+            raise ValueError("走廊顶点必须为凸多边形")
         object.__setattr__(self, "vertices", v)
         object.__setattr__(self, "_hs", _compile(v))  # 初始化半空间对象
 
