@@ -168,11 +168,11 @@ class Occupancy:
 
         if is_dynamic:
             self.blocked_dynamic[i_min : i_max + 1, j_min : j_max + 1] |= (
-                mask  # 切片按位或
+                mask  # 对动态障碍区切片按位或
             )
         else:
             self.occupied_grid[i_min : i_max + 1, j_min : j_max + 1] |= (
-                mask  # 切片按位或
+                mask  # 对静态障碍区切片按位或
             )
 
 

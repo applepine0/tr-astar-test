@@ -12,7 +12,7 @@ def is_near_zero(num: float) -> bool:
     return abs(num) < 1e-6
 
 
-def _signed_area(vertices: tuple[tuple[float, float], ...]) -> float:
+def signed_area(vertices: tuple[tuple[float, float], ...]) -> float:
     """鞋带公式：计算多边形的有向面积，顺时针为负，逆时针为正"""
     area = 0.0
     n = len(vertices)
@@ -23,9 +23,9 @@ def _signed_area(vertices: tuple[tuple[float, float], ...]) -> float:
     return area / 2.0
 
 
-def _is_convex_ccw(vertices: tuple[tuple[float, float], ...]) -> bool:
+def is_convex_ccw(vertices: tuple[tuple[float, float], ...]) -> bool:
     """判断多边形是否为凸多边形，要求顶点按逆时针顺序排列"""
-    if not _signed_area(vertices) > 0:
+    if not signed_area(vertices) > 0:
         raise ValueError("请传入按逆时针顺序排列的顶点")
     n = len(vertices)
     if n < 3:
