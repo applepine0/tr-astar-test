@@ -26,7 +26,7 @@ class Halfspaces:
         """输入点的横纵坐标，返回点到半空间边界的最小距离(负表示超出)"""
         point = np.array([x, y])
         distances = self.b - self.A @ point
-        return np.min(distances)
+        return float(np.min(distances))
 
 
 @dataclass(frozen=True)
