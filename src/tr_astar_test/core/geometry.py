@@ -8,8 +8,36 @@ def wrap2pi(angle: float) -> float:
     return (angle + math.pi) % (2.0 * math.pi) - math.pi
 
 
-def is_near_zero(num: float):
+def is_near_zero(num: float) -> bool:
     return abs(num) < 1e-6
+
+
+def _signed_area(vertices: tuple[tuple[float, float], ...]) -> float:
+    """鞋带公式：计算多边形的有向面积，顺时针为负，逆时针为正"""
+    area = 0.0
+    n = len(vertices)
+    for i in range(n):
+        x1, y1 = vertices[i]
+        x2, y2 = vertices[(i + 1) % n]
+        area += x1 * y2 - x2 * y1
+    return area / 2.0
+
+
+def _is_convex_ccw(vertices: tuple[tuple[float, float], ...]) -> bool:
+    """判断多边形是否为凸多边形，要求顶点按逆时针顺序排列"""
+    if not _signed_area(vertices) > 0:
+        raise ValueError("请传入按逆时针顺序排列的顶点")
+    n = len(vertices)
+    if n < 3:
+        return False  # 少于3个顶点不能构成多边形
+    for i in range(n):
+        x1, y1 = vertices[i]
+        x2, y2 = vertices[(i + 1) % n]
+        x3, y3 = vertices[(i + 2) % n]
+        cross_product = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
+        if cross_product < 0 and not is_near_zero(cross_product):
+            return False  # 如果有一个叉积为负(允许近0)，则不是凸多边形
+    return True
 
 
 @dataclass(frozen=True)
