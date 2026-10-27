@@ -71,6 +71,7 @@ class Corridor:
 
 
 def _compile(v: tuple[tuple[float, float], ...]) -> Halfspaces:
+    """将走廊顶点'编译'生成半空间对象"""
     n = len(v)
     A: list[tuple[float, float]] = []
     b: list[float] = []
@@ -81,6 +82,15 @@ def _compile(v: tuple[tuple[float, float], ...]) -> Halfspaces:
         length = math.hypot(dx, dy)
         nx = -dx / length
         ny = dy / length
-        A.append((ny, -nx))  # 法向量
-        b.append(x0 * (ny) + y0 * -(nx))  # 距离
+        A.append((ny, nx))  # 法向量
+        b.append(x0 * (ny) + y0 * (nx))  # 距离
     return Halfspaces(np.array(A, dtype=float), np.array(b, dtype=float))
+
+
+def centerline(
+    corridors: tuple[Corridor, ...],
+    start: tuple[float, float],
+    end: tuple[float, float],
+) -> tuple[tuple[float, float], ...]:
+    """走廊'中心线':起点->各走廊中心点->终点"""
+    return (start, *[c.centroid for c in corridors], end)
