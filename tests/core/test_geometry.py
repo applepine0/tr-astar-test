@@ -15,7 +15,7 @@ import pytest
 from shapely.geometry import Point
 from shapely.geometry import Polygon as SgPolygon
 
-from tr_astar_test.core.geometry import Circle, Polygon, Pose2D, wrap2pi
+from tr_planning.core.geometry import Circle, Polygon, Pose2D, wrap2pi
 
 # ---------------------------------------------------------------- 独立参照
 

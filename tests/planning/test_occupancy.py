@@ -16,9 +16,9 @@ import math
 import numpy as np
 import pytest
 
-from tr_astar_test.core.field import Field
-from tr_astar_test.core.params import UNMOVEABLE_ZONE, FieldParams, RobotParams
-from tr_astar_test.planning.occupancy import (
+from tr_planning.core.field import Field
+from tr_planning.core.params import UNMOVEABLE_ZONE, FieldParams, RobotParams
+from tr_planning.planning.occupancy import (
     Occupancy,
     OccupancyGrid,
     build_occupancy,
@@ -141,7 +141,7 @@ class TestDynamicLayer:
         i, j = occ.world2ij(*target)
         assert occ.is_free(i, j)
 
-        from tr_astar_test.core.geometry import Circle
+        from tr_planning.core.geometry import Circle
 
         occ.set_blocked(Circle(target[0], target[1], 0.2), is_dynamic=True)
         assert occ.is_free(i, j) is False, "动态层未生效"
@@ -159,7 +159,7 @@ class TestDynamicLayer:
         assert occ.is_free(i, j) is False, "L1 被动态层的清空操作误删了"
 
     def test_dynamic_counts_into_ratio(self, occ):
-        from tr_astar_test.core.geometry import Circle
+        from tr_planning.core.geometry import Circle
 
         before = occ.occupied_ratio
         occ.set_blocked(Circle(1.0, 1.0, 0.3), is_dynamic=True)

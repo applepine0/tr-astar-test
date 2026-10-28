@@ -1,6 +1,6 @@
 """pytest 共享配置与 fixture。
 
-注意：本文件必须在 import tr_astar_test 之前设置 MPLCONFIGDIR，
+注意：本文件必须在 import tr_planning 之前设置 MPLCONFIGDIR，
 因为 planning.occupancy 在模块级 import 了 matplotlib.path。
 """
 
@@ -19,13 +19,13 @@ matplotlib.use("Agg")
 import numpy as np
 import pytest
 
-from tr_astar_test.core.field import Field
-from tr_astar_test.core.params import (
+from tr_planning.core.field import Field
+from tr_planning.core.params import (
     UNMOVEABLE_ZONE,
     FieldParams,
     RobotParams,
 )
-from tr_astar_test.planning.occupancy import (
+from tr_planning.planning.occupancy import (
     Occupancy,
     OccupancyGrid,
     build_occupancy,

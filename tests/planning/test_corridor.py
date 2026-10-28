@@ -18,7 +18,7 @@ import pytest
 from shapely.geometry import Point
 from shapely.geometry import Polygon as SgPolygon
 
-from tr_astar_test.planning.corridor import Corridor, Halfspaces, centerline
+from tr_planning.planning.corridor import Corridor, Halfspaces, centerline
 
 RECT = (0.0, 0.0, 1.0, 1.0)
 

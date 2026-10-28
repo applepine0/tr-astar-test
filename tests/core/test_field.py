@@ -14,9 +14,9 @@ import pytest
 from shapely.geometry import Point
 from shapely.geometry import Polygon as SgPolygon
 
-from tr_astar_test.core.field import Field
-from tr_astar_test.core.geometry import Circle, Polygon
-from tr_astar_test.core.params import UNMOVEABLE_ZONE, FieldParams
+from tr_planning.core.field import Field
+from tr_planning.core.geometry import Circle, Polygon
+from tr_planning.core.params import UNMOVEABLE_ZONE, FieldParams
 
 
 def covered_by(shapes: tuple[Polygon | Circle, ...], x: float, y: float) -> bool:
